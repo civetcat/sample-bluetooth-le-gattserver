@@ -97,6 +97,10 @@ class GattServerActivity : Activity() {
      * All read/write requests for characteristics and descriptors are handled here.
      */
     private val gattServerCallback = object : BluetoothGattServerCallback() {
+        override fun onMtuChanged(device: BluetoothDevice?, mtu: Int) {
+            super.onMtuChanged(device, mtu)
+            Log.i(TAG,"New MTU value is : $mtu")
+        }
 
         override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
