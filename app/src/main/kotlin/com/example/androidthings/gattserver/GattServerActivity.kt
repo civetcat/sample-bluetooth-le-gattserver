@@ -41,9 +41,10 @@ import android.text.format.DateFormat
 import android.util.Log
 import android.view.WindowManager
 import android.widget.TextView
+import java.util.*
 
-import java.util.Arrays
-import java.util.Date
+import kotlin.concurrent.schedule
+import kotlin.concurrent.thread
 
 private const val TAG = "GattServerActivity"
 
@@ -57,21 +58,14 @@ class GattServerActivity : Activity() {
     /* Collection of notification subscribers */
     private val registeredDevices = mutableSetOf<BluetoothDevice>()
 
-    /**
-     * Listens for system time changes and triggers a notification to
-     * Bluetooth subscribers.
-     */
-    private val timeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val adjustReason = when (intent.action) {
-                Intent.ACTION_TIME_CHANGED -> TimeProfile.ADJUST_MANUAL
-                Intent.ACTION_TIMEZONE_CHANGED -> TimeProfile.ADJUST_TIMEZONE
-                Intent.ACTION_TIME_TICK -> TimeProfile.ADJUST_NONE
-                else -> TimeProfile.ADJUST_NONE
-            }
+    fun startThread() {
+        thread(start = true) {
+            Log.v(TAG, "${Thread.currentThread()} start run")
             val now = System.currentTimeMillis()
-            notifyRegisteredDevices(now, adjustReason)
-            updateLocalUi(now)
+            Timer().schedule(0, 1000) {
+                Log.d(TAG, "timer run")
+                notifyRegisteredDevices(now, TimeProfile.ADJUST_NONE)
+            }
         }
     }
 
@@ -81,9 +75,8 @@ class GattServerActivity : Activity() {
      */
     private val bluetoothReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF)
 
-            when (state) {
+            when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF)) {
                 BluetoothAdapter.STATE_ON -> {
                     startAdvertising()
                     startServer()
@@ -118,6 +111,7 @@ class GattServerActivity : Activity() {
         override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.i(TAG, "BluetoothDevice CONNECTED: $device")
+                startThread()
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "BluetoothDevice DISCONNECTED: $device")
                 //Remove device from any active subscriptions
@@ -240,23 +234,6 @@ class GattServerActivity : Activity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        // Register for system clock events
-        val filter = IntentFilter().apply {
-            addAction(Intent.ACTION_TIME_TICK)
-            addAction(Intent.ACTION_TIME_CHANGED)
-            addAction(Intent.ACTION_TIMEZONE_CHANGED)
-        }
-
-        registerReceiver(timeReceiver, filter)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        unregisterReceiver(timeReceiver)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         val bluetoothAdapter = bluetoothManager.adapter
@@ -320,9 +297,7 @@ class GattServerActivity : Activity() {
     private fun stopAdvertising() {
         val bluetoothLeAdvertiser: BluetoothLeAdvertiser? =
                 bluetoothManager.adapter.bluetoothLeAdvertiser
-        bluetoothLeAdvertiser?.let {
-            it.stopAdvertising(advertiseCallback)
-        } ?: Log.w(TAG, "Failed to create advertiser")
+        bluetoothLeAdvertiser?.stopAdvertising(advertiseCallback) ?: Log.w(TAG, "Failed to create advertiser")
     }
 
     /**
