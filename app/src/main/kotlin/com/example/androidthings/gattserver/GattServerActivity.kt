@@ -18,6 +18,7 @@ package com.example.androidthings.gattserver
 
 import android.app.Activity
 import android.bluetooth.*
+import android.bluetooth.BluetoothGatt.GATT_SUCCESS
 import android.bluetooth.le.AdvertiseCallback
 import android.bluetooth.le.AdvertiseData
 import android.bluetooth.le.AdvertiseSettings
@@ -102,6 +103,13 @@ class GattServerActivity : Activity() {
             Log.i(TAG,"New MTU value is : $mtu")
         }
 
+        override fun onNotificationSent(device: BluetoothDevice?, status: Int) {
+            super.onNotificationSent(device, status)
+            if(status == GATT_SUCCESS) {
+                Log.i(TAG, "Sent notification")
+            }
+        }
+
         override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.i(TAG, "BluetoothDevice CONNECTED: $device")
@@ -119,11 +127,11 @@ class GattServerActivity : Activity() {
         ) {
             when (USER_INDEX) {
                 characteristic.uuid -> {
-                    Log.i(TAG, "Read CurrentTime")
+                    Log.i(TAG, "Characteristic : User Index read")
                     bluetoothGattServer?.sendResponse(
                         device,
                         requestId,
-                        BluetoothGatt.GATT_SUCCESS,
+                        GATT_SUCCESS,
                         0,
                         ConvertData.stringToByteArray("test1")
                     )
@@ -170,7 +178,7 @@ class GattServerActivity : Activity() {
             bluetoothGattServer?.sendResponse(
                 device,
                 requestId,
-                BluetoothGatt.GATT_SUCCESS,
+                GATT_SUCCESS,
                 offset,
                 value
             )
@@ -192,7 +200,7 @@ class GattServerActivity : Activity() {
                 bluetoothGattServer?.sendResponse(
                     device,
                     requestId,
-                    BluetoothGatt.GATT_SUCCESS,
+                    GATT_SUCCESS,
                     0,
                     returnValue
                 )
@@ -230,7 +238,7 @@ class GattServerActivity : Activity() {
                     bluetoothGattServer?.sendResponse(
                         device,
                         requestId,
-                        BluetoothGatt.GATT_SUCCESS,
+                        GATT_SUCCESS,
                         0, null
                     )
                 }
