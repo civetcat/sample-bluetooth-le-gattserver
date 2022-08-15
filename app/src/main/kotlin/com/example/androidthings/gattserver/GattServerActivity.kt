@@ -309,9 +309,6 @@ class GattServerActivity : Activity() {
 
         bluetoothGattServer?.addService(TimeProfile.createTimeService())
                 ?: Log.w(TAG, "Unable to create GATT server")
-
-        // Initialize the local UI
-        updateLocalUi(System.currentTimeMillis())
     }
 
     /**
@@ -340,15 +337,5 @@ class GattServerActivity : Activity() {
             timeCharacteristic?.value = exactTime
             bluetoothGattServer?.notifyCharacteristicChanged(device, timeCharacteristic, false)
         }
-    }
-
-    /**
-     * Update graphical UI on devices that support it with the current time.
-     */
-    private fun updateLocalUi(timestamp: Long) {
-        val date = Date(timestamp)
-        val displayDate = DateFormat.getMediumDateFormat(this).format(date)
-        val displayTime = DateFormat.getTimeFormat(this).format(date)
-        localTimeView.text = "$displayDate\n$displayTime"
     }
 }

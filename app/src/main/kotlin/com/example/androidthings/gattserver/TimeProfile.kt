@@ -40,10 +40,6 @@ object TimeProfile {
 
     // Adjustment Flags
     const val ADJUST_NONE: Byte = 0x0
-    const val ADJUST_MANUAL: Byte = 0x1
-    const val ADJUST_EXTERNAL: Byte = 0x2
-    const val ADJUST_TIMEZONE: Byte = 0x4
-    const val ADJUST_DST: Byte = 0x8
 
     /* Time bucket constants for local time information */
     private const val FIFTEEN_MINUTE_MILLIS = 900000
