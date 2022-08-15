@@ -138,6 +138,42 @@ class GattServerActivity : Activity() {
             }
         }
 
+        override fun onCharacteristicWriteRequest(
+            device: BluetoothDevice?,
+            requestId: Int,
+            characteristic: BluetoothGattCharacteristic?,
+            preparedWrite: Boolean,
+            responseNeeded: Boolean,
+            offset: Int,
+            value: ByteArray?
+        ) {
+            Log.i(
+                TAG, "Request id = $requestId " +
+                        "device = $device" +
+                        "offset = $offset" +
+                        "characteristic = $characteristic"
+            )
+            var receiveValue = ""
+            if (value != null) receiveValue = ConvertData.bytesToHex(value)
+            Log.d(
+                TAG, "onCharacteristicWriteRequest：requestId = $requestId, " +
+                        "preparedWrite=$preparedWrite, " +
+                        "responseNeeded=$responseNeeded, " +
+                        "offset=$offset, " +
+                        "value=$receiveValue"
+            )
+
+            bluetoothGattServer?.sendResponse(
+                device,
+                requestId,
+                BluetoothGatt.GATT_SUCCESS,
+                offset,
+                value
+            )
+
+            onResponseToClient(value, device, requestId, characteristic)
+        }
+
         override fun onDescriptorReadRequest(
             device: BluetoothDevice, requestId: Int, offset: Int,
             descriptor: BluetoothGattDescriptor
@@ -206,6 +242,26 @@ class GattServerActivity : Activity() {
                 }
             }
         }
+    }
+
+    private fun onResponseToClient(
+        value: ByteArray?,
+        device: BluetoothDevice?,
+        requestId: Int,
+        characteristic: BluetoothGattCharacteristic?
+    ) {
+        Log.e(
+            TAG,
+            "4.onResponseToClient：device name = ${device!!.name}, address = ${device.address}"
+        )
+        Log.e(TAG, "onResponseToClient：requestId = $requestId")
+        val msg = value?.let { ConvertData.transferForPrint(it) }
+        println("receive: $msg")
+
+        val str = "response data"
+        characteristic?.value = str.toByteArray()
+        bluetoothGattServer!!.notifyCharacteristicChanged(device, characteristic, false)
+        println("response: $str")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
