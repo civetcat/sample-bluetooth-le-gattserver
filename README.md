@@ -1,14 +1,10 @@
-# Bluetooth GATT Server Sample
+# Bluetooth GATT Server Sample (Kotlin)
 
 This application demonstrates accessing the `BluetoothGattServer` Android API
 from within an Android Things application. The sample application advertises
 the [Current Time Service](https://www.bluetooth.com/specifications/gatt/services),
 and implements the server role of the GATT
 [Time Profile](https://www.bluetooth.com/specifications/adopted-specifications).
-
-> **Note:** The Android Things Console will be turned down for non-commercial
-> use on January 5, 2022. For more details, see the
-> [FAQ page](https://developer.android.com/things/faq).
 
 ## Pre-requisites
 
@@ -41,7 +37,7 @@ By default, the command accepts a new date in the `MMddHHmmYYYY.ss` format:
 # Reboot ADB into root mode
 $ adb root
 
-# Set the date to 2017/12/31 12:00:00
+# Set the date to 2017/12/13 12:00:00
 $ adb shell date 123112002017.00
 ```
 
@@ -58,9 +54,27 @@ $ adb root
 $ adb shell setprop persist.sys.timezone "America/Denver"
 ```
 
+## Enable auto-launch behavior
+
+This sample app is currently configured to launch only when deployed from your
+development machine. To enable the main activity to launch automatically on boot,
+add the following `intent-filter` to the app's manifest file:
+
+```xml
+<activity ...>
+
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.HOME"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+    </intent-filter>
+
+</activity>
+```
+
 ## License
 
-Copyright 2017 The Android Open Source Project, Inc.
+Copyright 2018 The Android Open Source Project, Inc.
 
 Licensed to the Apache Software Foundation (ASF) under one or more contributor
 license agreements.  See the NOTICE file distributed with this work for
