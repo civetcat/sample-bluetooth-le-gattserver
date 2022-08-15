@@ -6,10 +6,10 @@ import android.bluetooth.BluetoothGattService
 import java.util.*
 
 object ServiceProfile {
-    /* Current Time Service UUID */
+    /* User define GATT Service UUID */
     val USER_DATA_GATT_SERVICE: UUID = UUID.fromString("0000181c-0000-1000-8000-00805f9b34fb")
 
-    /* Mandatory Current Time Information Characteristic */
+    /* User define Characteristic */
     val USER_INDEX: UUID = UUID.fromString("00002a9a-0000-1000-8000-00805f9b34fb")
 
     /* Mandatory Client Characteristic Config Descriptor */
@@ -26,10 +26,17 @@ object ServiceProfile {
 
         // Create Read Characteristic
         val readCharacter = BluetoothGattCharacteristic(
-            UUID_CHAR_READ,
-            BluetoothGattCharacteristic.PROPERTY_READ or BluetoothGattCharacteristic.PROPERTY_NOTIFY,
+            USER_INDEX,
+            BluetoothGattCharacteristic.PROPERTY_READ or
+                    BluetoothGattCharacteristic.PROPERTY_NOTIFY,
             BluetoothGattCharacteristic.PERMISSION_READ
         )
+        val configDescriptor = BluetoothGattDescriptor(
+            CLIENT_CONFIG,
+            //Read/write descriptor
+            BluetoothGattDescriptor.PERMISSION_READ or BluetoothGattDescriptor.PERMISSION_WRITE
+        )
+        readCharacter.addDescriptor(configDescriptor)
 
         // Create Write Characteristic
         val writeCharacter = BluetoothGattCharacteristic(
@@ -40,16 +47,8 @@ object ServiceProfile {
             BluetoothGattCharacteristic.PERMISSION_WRITE
         )
 
-        val configDescriptor = BluetoothGattDescriptor(
-            CLIENT_CONFIG,
-            //Read/write descriptor
-            BluetoothGattDescriptor.PERMISSION_READ or BluetoothGattDescriptor.PERMISSION_WRITE
-        )
-        writeCharacter.addDescriptor(configDescriptor)
-
         service.addCharacteristic(readCharacter)
         service.addCharacteristic(writeCharacter)
-
 
         return service
     }
