@@ -31,7 +31,6 @@ import android.os.Bundle
 import android.os.ParcelUuid
 import android.util.Log
 import android.view.WindowManager
-import android.widget.TextView
 import com.example.androidthings.gattserver.ServiceProfile.CLIENT_CONFIG
 import com.example.androidthings.gattserver.ServiceProfile.USER_DATA_GATT_SERVICE
 import com.example.androidthings.gattserver.ServiceProfile.USER_INDEX
@@ -43,9 +42,6 @@ private const val TAG = "GattServerActivity"
 
 class GattServerActivity : Activity() {
 
-    /* Local UI */
-    private lateinit var localTimeView: TextView
-
     /* Bluetooth API */
     private lateinit var bluetoothManager: BluetoothManager
     private var bluetoothGattServer: BluetoothGattServer? = null
@@ -56,7 +52,6 @@ class GattServerActivity : Activity() {
     fun startThread() {
         thread(start = true) {
             Log.v(TAG, "${Thread.currentThread()} start run")
-            val now = System.currentTimeMillis()
             Timer().schedule(0, 1000) {
                 Log.d(TAG, "timer run")
                 notifyRegisteredDevices()
@@ -118,9 +113,8 @@ class GattServerActivity : Activity() {
             device: BluetoothDevice, requestId: Int, offset: Int,
             characteristic: BluetoothGattCharacteristic
         ) {
-            val now = System.currentTimeMillis()
-            when {
-                USER_INDEX == characteristic.uuid -> {
+            when (USER_INDEX) {
+                characteristic.uuid -> {
                     Log.i(TAG, "Read CurrentTime")
                     bluetoothGattServer?.sendResponse(
                         device,
@@ -130,18 +124,6 @@ class GattServerActivity : Activity() {
                         ConvertData.stringToByteArray("test1")
                     )
                 }
-                /*
-                TimeProfile.LOCAL_TIME_INFO == characteristic.uuid -> {
-                    Log.i(TAG, "Read LocalTimeInfo")
-                    bluetoothGattServer?.sendResponse(
-                        device,
-                        requestId,
-                        BluetoothGatt.GATT_SUCCESS,
-                        0,
-                        ConvertData.stringToByteArray("test2")
-                    )
-                }
-                 */
                 else -> {
                     // Invalid characteristic
                     Log.w(TAG, "Invalid Characteristic Read: " + characteristic.uuid)
@@ -230,8 +212,6 @@ class GattServerActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_server)
 
-        localTimeView = findViewById(R.id.text_time)
-
         // Devices with a display should not go to sleep
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -305,7 +285,7 @@ class GattServerActivity : Activity() {
             val data = AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
                 .setIncludeTxPowerLevel(false)
-                .addServiceUuid(ParcelUuid(ServiceProfile.USER_DATA_GATT_SERVICE))
+                .addServiceUuid(ParcelUuid(USER_DATA_GATT_SERVICE))
                 .build()
 
             it.startAdvertising(settings, data, advertiseCallback)
