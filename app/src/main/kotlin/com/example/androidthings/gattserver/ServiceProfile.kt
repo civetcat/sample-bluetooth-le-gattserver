@@ -12,11 +12,10 @@ object ServiceProfile {
     /* User define Characteristic */
     val USER_INDEX: UUID = UUID.fromString("00002a9a-0000-1000-8000-00805f9b34fb")
 
-    /* Mandatory Client Characteristic Config Descriptor */
+    /* Client Characteristic Config Descriptor */
     val CLIENT_CONFIG: UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
 
-    val UUID_CHAR_READ = UUID.fromString("0000fff1-0000-1000-8000-00805f9b34fb")
-    val UUID_CHAR_WRITE = UUID.fromString("0000fff2-0000-1000-8000-00805f9b34fb")
+    private val UUID_CHAR_WRITE: UUID = UUID.fromString("0000fff2-0000-1000-8000-00805f9b34fb")
 
     fun createService(): BluetoothGattService {
         val service = BluetoothGattService(
