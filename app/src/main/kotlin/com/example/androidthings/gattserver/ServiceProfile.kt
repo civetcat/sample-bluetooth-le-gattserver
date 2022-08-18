@@ -10,7 +10,7 @@ object ServiceProfile {
     val USER_DATA_GATT_SERVICE: UUID = UUID.fromString("0000181c-0000-1000-8000-00805f9b34fb")
 
     /* User define Characteristic - Read and Notify */
-    val USER_INDEX: UUID = UUID.fromString("00002a9a-0000-1000-8000-00805f9b34fb")
+    val USER_DEF_CHAR: UUID = UUID.fromString("00002a9a-0000-1000-8000-00805f9b34fb")
 
     /* Client Characteristic Config Descriptor */
     val CLIENT_CONFIG: UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
@@ -26,7 +26,7 @@ object ServiceProfile {
 
         // Create Read Characteristic
         val readCharacter = BluetoothGattCharacteristic(
-            USER_INDEX,
+            USER_DEF_CHAR,
             BluetoothGattCharacteristic.PROPERTY_READ or
                     BluetoothGattCharacteristic.PROPERTY_NOTIFY,
             BluetoothGattCharacteristic.PERMISSION_READ

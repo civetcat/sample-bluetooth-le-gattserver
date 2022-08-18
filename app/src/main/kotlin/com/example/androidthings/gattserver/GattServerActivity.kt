@@ -34,7 +34,7 @@ import android.util.Log
 import android.view.WindowManager
 import com.example.androidthings.gattserver.ServiceProfile.CLIENT_CONFIG
 import com.example.androidthings.gattserver.ServiceProfile.USER_DATA_GATT_SERVICE
-import com.example.androidthings.gattserver.ServiceProfile.USER_INDEX
+import com.example.androidthings.gattserver.ServiceProfile.USER_DEF_CHAR
 import java.util.*
 import kotlin.concurrent.schedule
 import kotlin.concurrent.thread
@@ -124,7 +124,7 @@ class GattServerActivity : Activity() {
             device: BluetoothDevice, requestId: Int, offset: Int,
             characteristic: BluetoothGattCharacteristic
         ) {
-            when (USER_INDEX) {
+            when (USER_DEF_CHAR) {
                 characteristic.uuid -> {
                     Log.i(TAG, "Characteristic : User Index read")
                     bluetoothGattServer?.sendResponse(
@@ -403,7 +403,7 @@ class GattServerActivity : Activity() {
         for (device in registeredDevices) {
             val timeCharacteristic = bluetoothGattServer
                 ?.getService(USER_DATA_GATT_SERVICE)
-                ?.getCharacteristic(USER_INDEX)
+                ?.getCharacteristic(USER_DEF_CHAR)
             timeCharacteristic?.value = ConvertData.stringToByteArray("test3")
             bluetoothGattServer?.notifyCharacteristicChanged(device, timeCharacteristic, false)
         }
