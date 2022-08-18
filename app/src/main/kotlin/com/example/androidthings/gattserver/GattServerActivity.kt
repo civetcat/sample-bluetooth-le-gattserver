@@ -54,7 +54,6 @@ class GattServerActivity : Activity() {
         thread(start = true) {
             Log.v(TAG, "${Thread.currentThread()} start run")
             Timer().schedule(0, 1000) {
-                Log.d(TAG, "timer run")
                 notifyRegisteredDevices()
             }
         }
