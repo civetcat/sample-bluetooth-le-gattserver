@@ -58,8 +58,8 @@ class GattServerActivity : Activity() {
             }
         }
 
-        /* 1. OPCODE(Byte 0), Reserved(Byte 1), Sequence number(index)(Byte 2), 0 -> Number of packets / 1-N -> item ID(Byte 3), String value(Byte 4-19)
-           2. Calculate total package length  = Total length / 15
+        /* 1. OPCODE(Byte 0), Reserved(Byte 1), Sequence number(index)(Byte 2), 0 -> Number of packets / 1-N -> item ID(Byte 3), String value(Byte 4-19) (OK)
+           2. Calculate total package length  = Total length / 15 (OK)
            3. Split
            4. for loop / while loop to send notify to devices who is subscribed
          */
