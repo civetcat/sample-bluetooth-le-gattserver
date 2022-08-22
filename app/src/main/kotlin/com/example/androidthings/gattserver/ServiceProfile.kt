@@ -16,7 +16,7 @@ object ServiceProfile {
     val CLIENT_CONFIG: UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
 
     /* User define Characteristic - write */
-    private val UUID_CHAR_WRITE: UUID = UUID.fromString("0000fff2-0000-1000-8000-00805f9b34fb")
+    val UUID_CHAR_WRITE: UUID = UUID.fromString("0000fff2-0000-1000-8000-00805f9b34fb")
 
     fun createService(): BluetoothGattService {
         val service = BluetoothGattService(

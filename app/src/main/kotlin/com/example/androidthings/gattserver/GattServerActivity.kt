@@ -35,11 +35,11 @@ import android.view.WindowManager
 import com.example.androidthings.gattserver.ServiceProfile.CLIENT_CONFIG
 import com.example.androidthings.gattserver.ServiceProfile.USER_DATA_GATT_SERVICE
 import com.example.androidthings.gattserver.ServiceProfile.USER_DEF_CHAR
+import com.example.androidthings.gattserver.ServiceProfile.UUID_CHAR_WRITE
 import java.util.*
-import kotlin.concurrent.schedule
-import kotlin.concurrent.thread
 
 private const val TAG = "GattServerActivity"
+private const val VENDOR_INFO_COUNT = 4
 
 class GattServerActivity : Activity() {
 
@@ -50,21 +50,24 @@ class GattServerActivity : Activity() {
     /* Collection of notification subscribers */
     private val registeredDevices = mutableSetOf<BluetoothDevice>()
 
-    fun startThread() {
-        thread(start = true) {
-            Log.v(TAG, "${Thread.currentThread()} start run")
-            Timer().schedule(0, 1000) {
-                notifyRegisteredDevices()
-            }
-        }
+    fun sendVendorInfo() {
+        // Every info length need under 15 character
+        val modelName = ConvertData.stringToByteArray("K245")
+        val serialNumber = ConvertData.stringToByteArray("F20220182WSJF1")
+        val wifiSsid = ConvertData.stringToByteArray("SSS-12345")
+        val wifiPasswd = ConvertData.stringToByteArray("123456")
+        // 1. Send total string length
+        MultiPacketManager.sendTotalLength(VENDOR_INFO_COUNT)
+        // 2. Send several parts
+        val modelNamePacket = MultiPacketManager.sendModelNamePacket(modelName, 0)
+        val serialNumberPacket = MultiPacketManager.sendSerialNumber(serialNumber, 1)
+        val wifiSsidPacket = MultiPacketManager.sendWifiSsidPacket(wifiSsid, 2)
+        val wifiPasswdPacket = MultiPacketManager.sendWifiPasswordPacket(wifiPasswd, 3)
 
-        /* 1. OPCODE(Byte 0), Reserved(Byte 1), Sequence number(index)(Byte 2), 0 -> Number of packets / 1-N -> item ID(Byte 3), String value(Byte 4-19) (OK)
-           2. Calculate total package length  = Total length / 15 (OK)
-           3. Split
-           4. for loop / while loop to send notify to devices who is subscribed
-         */
-
-
+        notifyRegisteredDevices(modelNamePacket)
+        notifyRegisteredDevices(serialNumberPacket)
+        notifyRegisteredDevices(wifiSsidPacket)
+        notifyRegisteredDevices(wifiPasswdPacket)
     }
 
     /**
@@ -120,7 +123,7 @@ class GattServerActivity : Activity() {
         override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.i(TAG, "BluetoothDevice CONNECTED: $device")
-                startThread()
+                sendVendorInfo()
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "BluetoothDevice DISCONNECTED: $device")
                 //Remove device from any active subscriptions
@@ -173,6 +176,9 @@ class GattServerActivity : Activity() {
                         "characteristic = $characteristic"
             )
             var receiveValue = ""
+            if (value != null) {
+                Log.d(TAG, ConvertData.transferForPrint(value))
+            }
             if (value != null) receiveValue = ConvertData.bytesToHex(value)
             Log.d(
                 TAG, "onCharacteristicWriteRequest：requestId = $requestId, " +
@@ -192,10 +198,29 @@ class GattServerActivity : Activity() {
                 requestId,
                 GATT_SUCCESS,
                 offset,
-                value
+                null
             )
+            when (receiveType) {
+                BleCommand.CDR_VENDOR_INFO -> {
+                    sendVendorInfo()
+                    Log.d(TAG, "Vendor info")
+                }
+                BleCommand.TURN_ON_CDR_HOTSPOT -> {
+                    notifyRegisteredDevices(SinglePacketManager.sendWifiHotSpotPacket(true))
+                    Log.d(TAG, " Turn on hotspot")
+                }
+                BleCommand.TURN_OFF_CDR_HOTSPOT -> {
+                    notifyRegisteredDevices(SinglePacketManager.sendWifiHotSpotPacket(true))
+                    Log.d(TAG, " Turn off hotspot")
+                }
+                BleCommand.INSTALLATION_COMPLETE -> {
+                    notifyRegisteredDevices(SinglePacketManager.sendInstallComplete(true))
+                    Log.d(TAG, " Install complete")
+                }
+                else -> {}
+            }
 
-            onResponseToClient(value, device, requestId, characteristic)
+            //onResponseToClient(value, device, requestId, characteristic)
         }
 
         override fun onDescriptorReadRequest(
@@ -406,7 +431,7 @@ class GattServerActivity : Activity() {
      * Send a time service notification to any devices that are subscribed
      * to the characteristic.
      */
-    private fun notifyRegisteredDevices() {
+    private fun notifyRegisteredDevices(sendByteArray: ByteArray) {
         if (registeredDevices.isEmpty()) {
             Log.i(TAG, "No subscribers registered")
             return
@@ -416,8 +441,8 @@ class GattServerActivity : Activity() {
         for (device in registeredDevices) {
             val timeCharacteristic = bluetoothGattServer
                 ?.getService(USER_DATA_GATT_SERVICE)
-                ?.getCharacteristic(USER_DEF_CHAR)
-            timeCharacteristic?.value = ConvertData.stringToByteArray("test3")
+                ?.getCharacteristic(UUID_CHAR_WRITE)
+            timeCharacteristic?.value = sendByteArray
             bluetoothGattServer?.notifyCharacteristicChanged(device, timeCharacteristic, false)
         }
     }

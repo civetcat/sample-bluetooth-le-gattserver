@@ -11,37 +11,59 @@ object MultiPacketManager {
         return (result + 1).toByte()
     }
 
-    fun sendTotalLength(value: String): ByteArray {
+    fun sendTotalLength(value: Int): ByteArray {
         val output = ByteArray(4)
         output[0] = 0x01
         output[1] = 0x00
         output[2] = 0x00 // first packet index always be 0
-        output[3] = calculateTotalLength(value)
+        output[3] = value.toByte()
         return output
     }
 
-    fun sendMultiPacket(sendPacket: ByteArray, index: Int, itemId: Int): ByteArray {
+    fun sendModelNamePacket(sendPacket: ByteArray, index: Int): ByteArray {
         val output = ByteArray(20)
         output[0] = 0x01
         output[1] = 0x00
         output[2] = index.toByte()
-        output[3] = itemId.toByte() // item id , temp set 01 for vendor info
-        output[4] = 0x32
-        output[4] = 0x31
-
-        for (i in 4 until output.size) {
-            output[i] = sendPacket[i]
-        }
-
+        output[3] = 0x00
+        feedPacket(sendPacket, output)
         return output
     }
 
-    fun splitToSmallPacket(value: ByteArray, index: Int): ByteArray {
-        val output = ByteArray(packetLength)
-        for(i in packetLength * index until packetLength * (index + 1)) {
-            output[i] = value[i]
-            println(value[i])
+    fun sendSerialNumber(sendPacket: ByteArray, index: Int): ByteArray {
+        val output = ByteArray(20)
+        output[0] = 0x01
+        output[1] = 0x00
+        output[2] = index.toByte()
+        output[3] = 0x01
+
+        feedPacket(sendPacket, output)
+        return output
+    }
+
+    private fun feedPacket(sendPacket: ByteArray, output: ByteArray) {
+        for (i in sendPacket.indices) {
+            output[i + 4] = sendPacket[i]
         }
+    }
+
+    fun sendWifiSsidPacket(sendPacket: ByteArray, index: Int): ByteArray {
+        val output = ByteArray(20)
+        output[0] = 0x01
+        output[1] = 0x00
+        output[2] = index.toByte()
+        output[3] = 0x02
+        feedPacket(sendPacket, output)
+        return output
+    }
+
+    fun sendWifiPasswordPacket(sendPacket: ByteArray, index: Int): ByteArray {
+        val output = ByteArray(20)
+        output[0] = 0x01
+        output[1] = 0x00
+        output[2] = index.toByte()
+        output[3] = 0x03
+        feedPacket(sendPacket, output)
         return output
     }
 }
