@@ -60,7 +60,8 @@ class GattServerActivity : Activity() {
 
         /* 1. OPCODE(Byte 0), Reserved(Byte 1), Sequence number(index)(Byte 2), 0 -> Number of packets / 1-N -> item ID(Byte 3), String value(Byte 4-19)
            2. Calculate total package length  = Total length / 15
-           3. for loop / while loop to send notify to devices who is subscribed
+           3. Split
+           4. for loop / while loop to send notify to devices who is subscribed
          */
 
 
@@ -106,12 +107,12 @@ class GattServerActivity : Activity() {
     private val gattServerCallback = object : BluetoothGattServerCallback() {
         override fun onMtuChanged(device: BluetoothDevice?, mtu: Int) {
             super.onMtuChanged(device, mtu)
-            Log.i(TAG,"New MTU value is : $mtu")
+            Log.i(TAG, "New MTU value is : $mtu")
         }
 
         override fun onNotificationSent(device: BluetoothDevice?, status: Int) {
             super.onNotificationSent(device, status)
-            if(status == GATT_SUCCESS) {
+            if (status == GATT_SUCCESS) {
                 Log.i(TAG, "Sent notification")
             }
         }
@@ -180,6 +181,11 @@ class GattServerActivity : Activity() {
                         "offset=$offset, " +
                         "value=$receiveValue"
             )
+
+            // Parsing receive value
+            val receiveType: BleCommand =
+                ReceivePacketManager.parsingReceivePacketType(receiveValue)
+            Log.d(TAG, "Receive command : ${receiveType.name}")
 
             bluetoothGattServer?.sendResponse(
                 device,
