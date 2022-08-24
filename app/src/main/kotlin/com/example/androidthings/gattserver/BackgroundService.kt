@@ -1,19 +1,14 @@
 package com.example.androidthings.gattserver
 
 import android.app.Service
-import android.bluetooth.BluetoothManager
-import android.content.Context
 import android.content.Intent
-import android.os.*
-import android.os.Process.THREAD_PRIORITY_BACKGROUND
+import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 
 private val TAG = BackgroundService::class.simpleName
 
 class BackgroundService : Service() {
-    private lateinit var bluetoothManager: BluetoothManager
-    private lateinit var bleManager : BleManager
 
     override fun onCreate() {
         // Start up the thread running the service.  Note that we create a
@@ -27,11 +22,7 @@ class BackgroundService : Service() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show()
-
-        // For each start request, send a message to start a job and deliver the
-        // start ID so we know which request we're stopping when we finish the job
-        // If we get killed, after returning from here, restart
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -40,13 +31,12 @@ class BackgroundService : Service() {
     }
 
     override fun onDestroy() {
-        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "Service onDestroy")
         val bluetoothAdapter = BleManager.bluetoothManager.adapter
-        /*
         if (bluetoothAdapter.isEnabled) {
             BleManager.stopServer()
             BleManager.stopAdvertising()
         }
-         */
+        super.onDestroy()
     }
 }

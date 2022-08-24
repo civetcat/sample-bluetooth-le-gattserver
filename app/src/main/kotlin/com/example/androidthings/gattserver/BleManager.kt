@@ -245,10 +245,10 @@ object BleManager {
                 }
                 BleCommand.TURN_ON_CDR_HOTSPOT -> {
                     NetworkManager.openWifiHotspot(
-                            context,
-                            DeviceInfoManager.getSsid(),
-                            DeviceInfoManager.getPassword()
-                        )
+                        context,
+                        DeviceInfoManager.getSsid(),
+                        DeviceInfoManager.getPassword()
+                    )
                     val isOpen = NetworkManager.isWifiHotspotOn(context)
                     Log.d(TAG, "Wifi hotspot is open : $isOpen")
                     isOpen.let {
@@ -271,7 +271,7 @@ object BleManager {
                         )
                     }.let {
                         notifyRegisteredDevices(it)
-                        startGattServer()
+                        //startGattServer()
                     }
                     Log.d(TAG, " Turn off hotspot")
                 }
