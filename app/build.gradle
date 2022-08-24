@@ -38,6 +38,9 @@ android {
 }
 
 dependencies {
+    // Import MitacApi
+    implementation project(':LocalRepo')
+    // Kotlin stdlib
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     // Required -- JUnit 4 framework
     testImplementation "junit:junit:4.13.2"

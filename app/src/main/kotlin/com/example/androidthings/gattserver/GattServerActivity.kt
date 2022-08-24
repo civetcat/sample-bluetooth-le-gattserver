@@ -36,6 +36,7 @@ import com.example.androidthings.gattserver.ServiceProfile.CLIENT_CONFIG
 import com.example.androidthings.gattserver.ServiceProfile.USER_DATA_GATT_SERVICE
 import com.example.androidthings.gattserver.ServiceProfile.USER_DEF_CHAR
 import com.example.androidthings.gattserver.ServiceProfile.UUID_CHAR_WRITE
+import com.mitac.api.libs.MitacAPI
 import java.util.*
 
 private const val TAG = "GattServerActivity"
@@ -46,16 +47,21 @@ class GattServerActivity : Activity() {
     /* Bluetooth API */
     private lateinit var bluetoothManager: BluetoothManager
     private var bluetoothGattServer: BluetoothGattServer? = null
+    private lateinit var sn: String
+    private val model = "K245"
+    private lateinit var ssid : String
+    private val passwd = "Gemini2020"
 
     /* Collection of notification subscribers */
     private val registeredDevices = mutableSetOf<BluetoothDevice>()
 
     fun sendVendorInfo() {
+        Log.d(TAG, "SN: $sn , Model : $model , ssid : $ssid , passwd : $passwd")
         // Every info length need under 15 character
-        val modelName = ConvertData.stringToByteArray("K245")
-        val serialNumber = ConvertData.stringToByteArray("F20220182WSJF1")
-        val wifiSsid = ConvertData.stringToByteArray("SSS-12345")
-        val wifiPasswd = ConvertData.stringToByteArray("123456")
+        val modelName = ConvertData.stringToByteArray(model)
+        val serialNumber = ConvertData.stringToByteArray(sn)
+        val wifiSsid = ConvertData.stringToByteArray(ssid)
+        val wifiPasswd = ConvertData.stringToByteArray(passwd)
         // 1. Send total string length
         MultiPacketManager.sendTotalLength(VENDOR_INFO_COUNT)
         // 2. Send several parts
@@ -206,11 +212,13 @@ class GattServerActivity : Activity() {
                     Log.d(TAG, "Vendor info")
                 }
                 BleCommand.TURN_ON_CDR_HOTSPOT -> {
-                    notifyRegisteredDevices(SinglePacketManager.sendWifiHotSpotPacket(true))
+                    val isOpenSuccess = SystemManager.openWifiHotspot(applicationContext, ssid, passwd)
+                    notifyRegisteredDevices(SinglePacketManager.sendWifiHotSpotPacket(isOpenSuccess))
                     Log.d(TAG, " Turn on hotspot")
                 }
                 BleCommand.TURN_OFF_CDR_HOTSPOT -> {
-                    notifyRegisteredDevices(SinglePacketManager.sendWifiHotSpotPacket(true))
+                    val isCloseSuccess = SystemManager.closeWifiHotspot(applicationContext)
+                    notifyRegisteredDevices(SinglePacketManager.sendWifiHotSpotPacket(isCloseSuccess))
                     Log.d(TAG, " Turn off hotspot")
                 }
                 BleCommand.INSTALLATION_COMPLETE -> {
@@ -319,6 +327,10 @@ class GattServerActivity : Activity() {
 
         // Devices with a display should not go to sleep
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        sn = MitacAPI.getInstance().systemService.getSerialNumber(applicationContext)
+        ssid = "CDR-#(${sn})"
+        Log.d(TAG, "SN: $sn , Model : $model , ssid : $ssid , passwd : $passwd")
 
         bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter = bluetoothManager.adapter
