@@ -196,32 +196,6 @@ object BleManager {
             device: BluetoothDevice, requestId: Int, offset: Int,
             characteristic: BluetoothGattCharacteristic
         ) {
-            /*
-            when (ServiceProfile.USER_DEF_CHAR) {
-                characteristic.uuid -> {
-                    Log.i(TAG, "Characteristic : User Index read")
-                    bluetoothGattServer?.sendResponse(
-                        device,
-                        requestId,
-                        BluetoothGatt.GATT_SUCCESS,
-                        0,
-                        ConvertData.stringToByteArray("test1")
-                    )
-                }
-                else -> {
-                    // Invalid characteristic
-                    Log.w(TAG, "Invalid Characteristic Read: " + characteristic.uuid)
-                    bluetoothGattServer?.sendResponse(
-                        device,
-                        requestId,
-                        BluetoothGatt.GATT_FAILURE,
-                        0,
-                        null
-                    )
-                }
-            }
-
-             */
         }
 
         override fun onCharacteristicWriteRequest(
@@ -281,7 +255,10 @@ object BleManager {
                         SinglePacketManager.sendWifiHotSpotPacket(
                             it
                         )
-                    }.let { notifyRegisteredDevices(it) }
+                    }.let {
+                        notifyRegisteredDevices(it)
+                        startScreenStream()
+                    }
                     Log.d(TAG, " Turn on hotspot")
                 }
                 BleCommand.TURN_OFF_CDR_HOTSPOT -> {
@@ -292,7 +269,10 @@ object BleManager {
                         SinglePacketManager.sendWifiHotSpotPacket(
                             it
                         )
-                    }.let { notifyRegisteredDevices(it) }
+                    }.let {
+                        notifyRegisteredDevices(it)
+                        startGattServer()
+                    }
                     Log.d(TAG, " Turn off hotspot")
                 }
                 BleCommand.INSTALLATION_COMPLETE -> {
@@ -393,6 +373,32 @@ object BleManager {
                 ?.getCharacteristic(ServiceProfile.UUID_CHAR_WRITE)
             timeCharacteristic?.value = sendByteArray
             bluetoothGattServer?.notifyCharacteristicChanged(device, timeCharacteristic, false)
+        }
+    }
+
+    private fun startScreenStream() {
+        Log.d(TAG, "startScreenStream")
+        var intent = context.packageManager
+            .getLaunchIntentForPackage("com.mitac.gemini.screenshare")
+        if (intent == null) {
+            intent = context.packageManager
+                .getLaunchIntentForPackage("com.mitac.gemini.screenshare.debug")
+        }
+        if (intent != null) {
+            intent.putExtra("service", true)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            context.startActivity(intent)
+        }
+    }
+
+    private fun startGattServer() {
+        Log.d(TAG, "startGattServer")
+        var intent = context.packageManager
+            .getLaunchIntentForPackage("com.example.androidthings.gattserver")
+        if (intent != null) {
+            intent.putExtra("service", true)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            context.startActivity(intent)
         }
     }
 }

@@ -42,9 +42,11 @@ class BackgroundService : Service() {
     override fun onDestroy() {
         Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show()
         val bluetoothAdapter = BleManager.bluetoothManager.adapter
+        /*
         if (bluetoothAdapter.isEnabled) {
             BleManager.stopServer()
             BleManager.stopAdvertising()
         }
+         */
     }
 }
