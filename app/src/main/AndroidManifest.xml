@@ -18,6 +18,10 @@
           package="com.example.androidthings.gattserver">
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
     <application android:label="@string/app_name">
         <service android:name=".BackgroundService"/>
         <activity android:name=".GattServerActivity">

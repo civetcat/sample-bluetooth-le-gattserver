@@ -270,14 +270,14 @@ object BleManager {
                     Log.d(TAG, "Vendor info")
                 }
                 BleCommand.TURN_ON_CDR_HOTSPOT -> {
-                    val isOpenSuccess = context.let {
-                        SystemManager.openWifiHotspot(
-                            it,
+                    NetworkManager.openWifiHotspot(
+                            context,
                             DeviceInfoManager.getSsid(),
                             DeviceInfoManager.getPassword()
                         )
-                    }
-                    isOpenSuccess.let {
+                    val isOpen = NetworkManager.isWifiHotspotOn(context)
+                    Log.d(TAG, "Wifi hotspot is open : $isOpen")
+                    isOpen.let {
                         SinglePacketManager.sendWifiHotSpotPacket(
                             it
                         )
@@ -285,9 +285,10 @@ object BleManager {
                     Log.d(TAG, " Turn on hotspot")
                 }
                 BleCommand.TURN_OFF_CDR_HOTSPOT -> {
-                    val isCloseSuccess = context
-                        .let { SystemManager.closeWifiHotspot(it) }
-                    isCloseSuccess.let {
+                    NetworkManager.closeWifiHotspot(context)
+                    val isOpen = NetworkManager.isWifiHotspotOn(context)
+                    Log.d(TAG, "Wifi hotspot is open : $isOpen")
+                    isOpen.let {
                         SinglePacketManager.sendWifiHotSpotPacket(
                             it
                         )
