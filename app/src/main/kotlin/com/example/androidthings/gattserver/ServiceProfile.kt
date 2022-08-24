@@ -9,9 +9,6 @@ object ServiceProfile {
     /* User define GATT Service UUID */
     val USER_DATA_GATT_SERVICE: UUID = UUID.fromString("0000181c-0000-1000-8000-00805f9b34fb")
 
-    /* User define Characteristic - Read and Notify */
-    val USER_DEF_CHAR: UUID = UUID.fromString("00002a9a-0000-1000-8000-00805f9b34fb")
-
     /* Client Characteristic Config Descriptor */
     val CLIENT_CONFIG: UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
 
@@ -24,20 +21,6 @@ object ServiceProfile {
             BluetoothGattService.SERVICE_TYPE_PRIMARY
         )
 
-        // Create Read Characteristic
-        val readCharacter = BluetoothGattCharacteristic(
-            USER_DEF_CHAR,
-            BluetoothGattCharacteristic.PROPERTY_READ or
-                    BluetoothGattCharacteristic.PROPERTY_NOTIFY,
-            BluetoothGattCharacteristic.PERMISSION_READ
-        )
-        val configDescriptor = BluetoothGattDescriptor(
-            CLIENT_CONFIG,
-            //Read/write descriptor
-            BluetoothGattDescriptor.PERMISSION_READ or BluetoothGattDescriptor.PERMISSION_WRITE
-        )
-        readCharacter.addDescriptor(configDescriptor)
-
         // Create Write Characteristic
         val writeCharacter = BluetoothGattCharacteristic(
             UUID_CHAR_WRITE,
@@ -47,7 +30,13 @@ object ServiceProfile {
             BluetoothGattCharacteristic.PERMISSION_WRITE
         )
 
-        service.addCharacteristic(readCharacter)
+        val configDescriptor = BluetoothGattDescriptor(
+            CLIENT_CONFIG,
+            //Read/write descriptor
+            BluetoothGattDescriptor.PERMISSION_READ or BluetoothGattDescriptor.PERMISSION_WRITE
+        )
+        writeCharacter.addDescriptor(configDescriptor)
+
         service.addCharacteristic(writeCharacter)
 
         return service

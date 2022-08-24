@@ -1,7 +1,5 @@
 package com.example.androidthings.gattserver
 
-val packetLength = 15
-
 object MultiPacketManager {
     fun calculateTotalLength(string: String): Byte {
         val result = string.length / 15
