@@ -1,5 +1,9 @@
 package com.example.androidthings.gattserver
 
+import android.util.Log
+
+private val TAG = MultiPacketManager::class.simpleName
+
 object MultiPacketManager {
     fun calculateTotalLength(string: String): Byte {
         val result = string.length / 15
@@ -19,7 +23,7 @@ object MultiPacketManager {
     }
 
     fun sendModelNamePacket(sendPacket: ByteArray, index: Int): ByteArray {
-        val output = ByteArray(20)
+        val output = ByteArray(30)
         output[0] = 0x01
         output[1] = 0x00
         output[2] = index.toByte()
@@ -29,7 +33,7 @@ object MultiPacketManager {
     }
 
     fun sendSerialNumber(sendPacket: ByteArray, index: Int): ByteArray {
-        val output = ByteArray(20)
+        val output = ByteArray(30)
         output[0] = 0x01
         output[1] = 0x00
         output[2] = index.toByte()
@@ -40,23 +44,24 @@ object MultiPacketManager {
     }
 
     private fun feedPacket(sendPacket: ByteArray, output: ByteArray) {
+        Log.d(TAG,"sendPacket ${ConvertData.transferForPrint(sendPacket)}")
         for (i in sendPacket.indices) {
             output[i + 4] = sendPacket[i]
         }
     }
 
-    fun sendWifiSsidPacket(sendPacket: ByteArray, index: Int): ByteArray {
-        val output = ByteArray(20)
+    fun sendWifiSsidPacket(wifiSsid: ByteArray, index: Int): ByteArray {
+        val output = ByteArray(30)
         output[0] = 0x01
         output[1] = 0x00
         output[2] = index.toByte()
         output[3] = 0x02
-        feedPacket(sendPacket, output)
+        feedPacket(wifiSsid, output)
         return output
     }
 
     fun sendWifiPasswordPacket(sendPacket: ByteArray, index: Int): ByteArray {
-        val output = ByteArray(20)
+        val output = ByteArray(30)
         output[0] = 0x01
         output[1] = 0x00
         output[2] = index.toByte()

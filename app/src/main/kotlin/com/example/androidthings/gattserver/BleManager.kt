@@ -147,6 +147,7 @@ object BleManager {
      * Shut down the GATT server.
      */
     fun stopServer() {
+        Log.d(TAG,"stop server")
         bluetoothGattServer?.close()
         context.unregisterReceiver(bluetoothReceiver)
     }
