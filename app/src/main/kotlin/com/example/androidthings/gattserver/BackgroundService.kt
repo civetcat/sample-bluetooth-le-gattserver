@@ -1,10 +1,16 @@
 package com.example.androidthings.gattserver
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.graphics.Color
 import android.os.IBinder
+import android.support.v4.app.NotificationCompat
 import android.util.Log
 import android.widget.Toast
+
 
 private val TAG = BackgroundService::class.simpleName
 
@@ -16,6 +22,7 @@ class BackgroundService : Service() {
         // main thread, which we don't want to block.  We also make it
         // background priority so CPU-intensive work will not disrupt our UI.
         Log.d(TAG, "onCreate")
+        startForeground()
         BleManager.init(this)
         BleManager.startBleServer()
     }
@@ -38,5 +45,27 @@ class BackgroundService : Service() {
             BleManager.stopAdvertising()
         }
         super.onDestroy()
+    }
+
+    private fun startForeground() {
+        val NOTIFICATION_CHANNEL_ID = "com.example.simpleapp"
+        val channelName = "My Background Service"
+        val chan = NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            channelName,
+            NotificationManager.IMPORTANCE_NONE
+        )
+        chan.lightColor = Color.BLUE
+        chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        val manager = (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
+        manager.createNotificationChannel(chan)
+        val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+        val notification = notificationBuilder.setOngoing(true)
+            .setSmallIcon(R.drawable.ic_mitacapi)
+            .setContentTitle("App is running in background")
+            .setPriority(NotificationManager.IMPORTANCE_MIN)
+            .setCategory(Notification.CATEGORY_SERVICE)
+            .build()
+        startForeground(2, notification)
     }
 }

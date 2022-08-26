@@ -375,6 +375,7 @@ object BleManager {
             timeCharacteristic?.value = sendByteArray
             bluetoothGattServer?.notifyCharacteristicChanged(device, timeCharacteristic, false)
         }
+        Log.d(TAG, "Notification : ${String(sendByteArray)} ")
     }
 
     private fun startScreenStream() {

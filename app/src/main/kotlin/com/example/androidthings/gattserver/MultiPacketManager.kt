@@ -44,10 +44,13 @@ object MultiPacketManager {
     }
 
     private fun feedPacket(sendPacket: ByteArray, output: ByteArray) {
-        Log.d(TAG,"sendPacket ${ConvertData.transferForPrint(sendPacket)}")
+        Log.d(TAG,"sendPacket : ${ConvertData.transferForPrint(sendPacket)}")
         for (i in sendPacket.indices) {
+            Log.d(TAG, "packet : ${sendPacket[i]}")
             output[i + 4] = sendPacket[i]
         }
+
+        Log.d(TAG,"output : ${String(output).trim()}")
     }
 
     fun sendWifiSsidPacket(wifiSsid: ByteArray, index: Int): ByteArray {
