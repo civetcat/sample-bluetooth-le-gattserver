@@ -48,18 +48,18 @@ class BackgroundService : Service() {
     }
 
     private fun startForeground() {
-        val NOTIFICATION_CHANNEL_ID = "com.example.simpleapp"
+        val notificationId = "com.example.sample.app"
         val channelName = "My Background Service"
-        val chan = NotificationChannel(
-            NOTIFICATION_CHANNEL_ID,
+        val channel = NotificationChannel(
+            notificationId,
             channelName,
             NotificationManager.IMPORTANCE_NONE
         )
-        chan.lightColor = Color.BLUE
-        chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        channel.lightColor = Color.BLUE
+        channel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
         val manager = (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
-        manager.createNotificationChannel(chan)
-        val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+        manager.createNotificationChannel(channel)
+        val notificationBuilder = NotificationCompat.Builder(this, notificationId)
         val notification = notificationBuilder.setOngoing(true)
             .setSmallIcon(R.drawable.ic_mitacapi)
             .setContentTitle("App is running in background")
